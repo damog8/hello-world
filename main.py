@@ -1,11 +1,13 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
+from sqlalchemy.orm import Session
+
+from database import Base, engine, get_db
+from models import Item
 
 app = FastAPI()
 
-@app.get("/")
-def read_root():
-    return {"message": "Hello, world. I built this."}
+Base.metadata.create_all(bind=engine)
 
-@app.get("/hello/{name}")
-def say_hello(name: str):
-    return {"message": f"Hello {name}, this app is alive on the internet."}
+@app.get("/items")
+def list_items(db: Session = Depends(get_db)):
+    return db.query(Item).all()
