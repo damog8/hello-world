@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi import Request
+from fastapi import Query
 
 from database import engine, SessionLocal
 from models import Base, Message
@@ -23,17 +24,20 @@ def say_hello(name: str):
 @app.get("/messages")
 def read_messages():
     db = SessionLocal()
-    messages = db.query(Message).all()
+    messages = db.query(Message).order_by(Message.created_at.desc()).all()
     db.close()
-    return [{"id": m.id, "text": m.text} for m in messages]
+    return [
+        {"id": m.id, "text": m.text, "created_at": m.created_at.isoformat()} 
+        for m in messages
+    ]
 
 @app.post("/messages")
-def create_message(text: str):
+def create_message(text: str = Query(min_length=1, max_length=200)):
     db = SessionLocal()
     message = Message(text=text)
     db.add(message)
     db.commit()
     db.refresh(message)
     db.close()
-    return {"id": message.id, "text": message.text}
+    return {"id": message.id, "text": message.text, "created_at": message.created_at.isoformat()}
 

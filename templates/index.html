@@ -49,7 +49,8 @@
         const data = await res.json();
         data.forEach(m => {
           const li = document.createElement("li");
-          li.textContent = m.text ?? JSON.stringify(m);
+          const when = m.created_at ? new Date(m.created_at).toLocaleString() : "";
+          li.textContent = when? `${m.text} (${when})` : m.text;
           messagesEl.appendChild(li);
         });
       }
