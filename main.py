@@ -41,3 +41,10 @@ def create_message(text: str = Query(min_length=1, max_length=200)):
     db.close()
     return {"id": message.id, "text": message.text, "created_at": message.created_at.isoformat()}
 
+@app.get("/api")
+def api_root():
+    return {
+        "name": "Hello World Messages",
+        "status": "ok",
+        "endpoints": ["/messages (GET, POST)"]
+    }
