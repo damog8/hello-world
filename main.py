@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
-from database import engine
-from models import Base
+from database import engine, SessionLocal
+from models import Base, Message
 
 app = FastAPI()
 
@@ -16,9 +16,19 @@ def read_root():
 def say_hello(name: str):
     return {"message": f"Hello {name}, this app is alive on the internet."}
 
-@app.get("/messages")
-def create_message(text: str):
+@app.get("/messsages")
+def read_messages():
     db = SessionLocal()
-    message = db.query(Message).all()
+    messages = db.query(Message).all()
     db.close()
     return messages
+
+@app.post("/messages")
+def create_message(text: str):
+    db = SessionLocal()
+    message = Message(text=text)
+    db.add(message)
+    db.commit()
+    db.refresh(message)
+    db.close()
+    return {"id": message.id, "text": message.text}
